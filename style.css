@@ -1,0 +1,251 @@
+/* blue: #120d23 */
+/* green: #00f19b */
+/* purple: #4f27e7 */
+/* black: #242424 */
+/* white: #fff */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Sofia+Sans+Semi+Condensed:ital,wght@0,1..1000;1,1..1000&display=swap');
+
+
+/**
+* GENERAL
+**/
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+.container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+section {
+    padding: 50px 0;
+}
+.section__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+}
+h1 {
+    font-family: 'Sofia Sans Semi Condensed', sans-serif;
+    font-size: 40px;
+}
+h2 {
+    font-size: 28px;
+    font-weight: 400;
+}
+h2.section__title {
+    font-family: 'Sofia Sans Semi Condensed', sans-serif;
+    font-weight: 700;
+    color: #120d23;
+}
+h3 {
+    font-weight: 400;
+    font-size: 18px;
+}
+p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+a, button {
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+select {
+    width: 100%;
+    max-width: 150px;
+    padding: 0 5px;
+    height: 30px;
+    font-size: 15px;
+}
+
+
+/**
+* HEADER
+**/
+header {
+    position: relative;
+    background: #120d23;
+    padding-top: 130px;
+    padding-bottom: 40px;
+}
+nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 0;
+}
+nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+nav .logo {
+    display: flex;
+    align-items: center;
+}
+nav .logo img {
+    width: 40px;
+    margin-right: 15px;
+}
+nav .logo h1 {
+    color: #fff;
+}
+nav .tagline p {
+    font-size: 14px;
+    color: #fff;
+    text-align: right;
+}
+
+
+/**
+* SEARCH
+**/
+#search h2 {
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 12px;
+}
+#search form {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 30px;
+    overflow: hidden;
+}
+#search input {
+    width: 100%;
+    height: 40px;
+    border: none;
+    padding: 0 48px 0 16px;
+    font-size: 15px;
+    outline: none;
+}
+#search button {
+    position: absolute;
+    top: 0;
+    right: 6px;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 10px 6px;
+    line-height: 0;
+}
+#search button:hover {
+    color: #4f27e7;
+}
+#search svg {
+    height: 100%;
+    width: auto;
+}
+
+
+/**
+* ARTISTS GRID
+**/
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+.grid__card {
+    margin-top: 48px;
+}
+.card__image {
+    margin-bottom: 8px;
+}
+.card__image--round {
+    width: 100%;
+    max-width: 180px;
+    aspect-ratio: 1;
+    background: lightgray;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 12px;
+}
+.grid--artists .grid__card {
+    width: calc(100% / 5);
+    padding: 0 12px;
+    text-align: center;
+}
+.grid--artists .grid__card p {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+}
+
+
+/**
+* FOOTER
+**/
+footer {
+    background: #120d23;
+    padding: 16px 0;
+}
+footer .logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+footer .logo img {
+    width: 28px;
+    margin-right: 8px;
+}
+footer .logo span {
+    font-family: 'Sofia Sans Semi Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+}
+
+
+/**
+* RESPONSIVE
+**/
+@media(max-width: 991px) {
+    .grid--artists .grid__card {
+        width: calc(100% / 3);
+    }
+}
+@media(max-width: 767px) {
+    .container {
+        padding: 0 20px;
+    }
+}
+@media(max-width: 575px) {
+    nav .tagline {
+        display: none;
+    }
+    .section__heading {
+        flex-direction: column;
+        gap: 12px 0;
+        margin-bottom: 12px;
+    }
+    .grid--artists .grid__card {
+        width: 50%;
+    }
+}
+@media(max-width: 399px) {
+    .grid--artists .grid__card {
+        width: 100%;
+    }
+}
