@@ -23,7 +23,7 @@
 // on page load, show a list of popular (or random) artists - 10 total in a grid
 // include a search input to search by artist name
 // include a filter to filter by genre
-// include a sort dropdown to sort alphabetical by artist name, ???
+// include a sort dropdown to sort alphabetical by artist name, number of albums/singles, ???
 // information for each artist will include: name, image, genres, number of albums, link to artist page
 // artist page will include name, image, genres, list of top tracks (name only), list of albums
 // information for each album will include: name, image, release date, number of tracks
@@ -87,13 +87,17 @@ showTopArtists();
 
 async function artistHtml(artist) {
     const artistInfo = await getArtistInfo(artist.id);
+    // console.log(artistInfo);
+
+    const artistAlbums = await getTotalAlbums(artist.id);
 
     return `<div class="grid__card">
         <div class="card__image card__image--round">
             ${getArtistImage(artistInfo)}
         </div>
         <h3>${artistInfo.name}</h3>
-        <p>${listGenres(artistInfo.genres)}</p>
+        <p class="artist__albums">${artistAlbums.toLocaleString('en-US')} Albums/Singles</p>
+        <p class="artist__genres">${listGenres(artistInfo.genres)}</p>
     </div>`;
 }
 
@@ -120,4 +124,17 @@ function listGenres(genres) {
         return genres.join(', ');
     }
     return;
+}
+
+async function getTotalAlbums(artistId) {
+    if( !accessToken ) {
+        accessToken = await getAccessToken();
+    }
+    const response = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+    const artistAlbums = await response.json();
+    return artistAlbums.total;
 }

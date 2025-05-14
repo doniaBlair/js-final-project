@@ -200,7 +200,7 @@ nav .tagline p {
     background: lightgray;
     border-radius: 50%;
     overflow: hidden;
-    margin: 0 auto 12px;
+    margin: 0 auto 16px;
 }
 .card__image--round img {
     width: 100%;
@@ -212,11 +212,18 @@ nav .tagline p {
     padding: 0 12px;
     text-align: center;
 }
+.grid--artists .grid__card h3 {
+    margin-bottom: 12px;
+}
 .grid--artists .grid__card p {
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-top: 4px;
+    margin-top: 2px;
+}
+.grid--artists .grid__card .artist__albums {
+    color: #4f27e7;
 }
 
 
