@@ -16,6 +16,14 @@
     box-sizing: border-box;
     font-family: 'Roboto', sans-serif;
 }
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main {
+    flex-grow: 1;
+}
 .container {
     position: relative;
     z-index: 1;
@@ -162,6 +170,19 @@ nav .tagline p {
 /**
 * ARTISTS GRID
 **/
+.loading {
+    display: none;
+    justify-content: center;
+    padding-top: 60px;
+}
+.loading.content-loading {
+    display: flex;
+}
+.loading img {
+    height: 48px;
+    width: auto;
+    animation: rotate 0.7s infinite linear;
+}
 .grid {
     display: flex;
     flex-wrap: wrap;
@@ -180,6 +201,11 @@ nav .tagline p {
     border-radius: 50%;
     overflow: hidden;
     margin: 0 auto 12px;
+}
+.card__image--round img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 .grid--artists .grid__card {
     width: calc(100% / 5);
@@ -247,5 +273,18 @@ footer .logo span {
 @media(max-width: 399px) {
     .grid--artists .grid__card {
         width: 100%;
+    }
+}
+
+
+/**
+* ANIMATIONS
+**/
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
     }
 }
