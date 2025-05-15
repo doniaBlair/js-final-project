@@ -77,8 +77,9 @@ async function showPopularArtists() {
     const tracks = playlistData.tracks.items;
 
     // get list of artists from tracks that are not explicit
-    const cleanTracks = tracks.filter(track => !track.track.explicit);
-    const artists = cleanTracks.map(track => track.track.artists[0]);
+    // const cleanTracks = tracks.filter(track => !track.track.explicit);
+    // const artists = cleanTracks.map(track => track.track.artists[0]);
+    const artists = tracks.map(track => track.track.artists[0]);
 
     // filter out duplicate artists
     // using filter() and findIndex() keeps the first occurrence of each object with a unique property and filters out duplicates
