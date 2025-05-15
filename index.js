@@ -34,10 +34,13 @@
 // const clientSecret = '1eff2b0a945a4984ab69f5431e49ff35';
 const clientID = '5eea5bb6b03543a5aeffd28155206b0b';
 const clientSecret = 'd06fda22796249d7ad39e4f0944d32ac';
+const orderSelect = document.querySelector('#sort-artists');
 let accessToken = '';
 let cached;
 let playlistData;
 let searchData;
+let artistSource = '';
+let currentArtists = [];
 
 // get access token
 async function getAccessToken() {
@@ -56,7 +59,7 @@ async function getAccessToken() {
 
 
 // on page load, show the top ten artists from the public Billboard Hot 100 playlist: https://open.spotify.com/playlist/6UeSakyzhiEt4NB3UAd6NQ
-async function renderArtists(order) {
+async function showPopularArtists() {
     if( !accessToken ) {
         accessToken = await getAccessToken();
     }
@@ -70,9 +73,6 @@ async function renderArtists(order) {
         playlistData = await response.json();
     }
 
-    // add loading icon
-    document.querySelector('.loading').classList.add('content-loading');
-
     const tracks = playlistData.tracks.items;
 
     // get list of artists from tracks that are not explicit
@@ -85,60 +85,46 @@ async function renderArtists(order) {
     
     // return first 10 artists
     const topTenArtists = uniqueArtists.slice(0, 10);
-    let sortedArtists = topTenArtists;
 
-    // apply sort order
-    if( order === 'alphabetical_asc' ) {
-        sortedArtists.sort((a, b) => {
-            const nameA = a.name.toLowerCase();
-            const nameB = b.name.toLowerCase();
+    // update currentArtists array and content source
+    currentArtists = topTenArtists;
+    artistSource = 'playlist';
 
-            if( nameA < nameB ) {
-                return -1;
-            } else if( nameA > nameB ) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-    } else if( order === 'alphabetical_desc' ) {
-        sortedArtists.sort((a, b) => {
-            const nameA = a.name.toLowerCase();
-            const nameB = b.name.toLowerCase();
-
-            if( nameA > nameB ) {
-                return -1;
-            } else if( nameA < nameB ) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-    } else {
-        sortedArtists = topTenArtists;
-    }
-
-    // output grid with artist info
-    // const artistsHtmlArray = await Promise.all(sortedArtists.map(artist => artistHtml(artist)));
-    const isCached = sortedArtists.every(artist => localStorage.getItem(`artist_${artist.id}`));
-    const artistsHtmlArray = [];
-    for( let i = 0; i < sortedArtists.length; i++ ) {
-        const artist = sortedArtists[i];
-        const html = await artistHtml(artist);
-        artistsHtmlArray.push(html);
-
-        // delay each request by 300ms to prevent exceeding rate limits (only if data is not cached)
-        if( !isCached ) {
-            await delay(500);
-        }
-    }
-    const artistsHtml = artistsHtmlArray.join('');
-    document.querySelector('.grid--artists').innerHTML = artistsHtml;
-
-    // remove loading icon
-    document.querySelector('.loading').classList.remove('content-loading');
+    // get sort order from dropdown and call to render artists
+    const sortOrder = orderSelect.options[orderSelect.selectedIndex];
+    sortAndRenderArtists(artistSource, sortOrder);
 }
-renderArtists();
+
+async function searchArtists(event) {
+    event.preventDefault();
+    const searchTerm = event.target[0].value.trim();
+
+    // show default popular artists if no search term is entered
+    if( !searchTerm ) {
+        showPopularArtists();
+        return;
+    }
+
+    if( !accessToken ) {
+        accessToken = await getAccessToken();
+    }
+    // default limit from Spotify API is 20 - change by adding &limit=X to fetch url
+    const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchTerm)}&type=artist&limit=10`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+    searchData = await response.json();
+
+    // update currentArtists array and content source
+    const searchResults = searchData.artists.items;
+    currentArtists = searchResults;
+    artistSource = 'search';
+
+    // get sort order from dropdown and call to render artists
+    const sortOrder = orderSelect.options[orderSelect.selectedIndex];
+    sortAndRenderArtists(artistSource, sortOrder);
+}
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -184,7 +170,13 @@ async function getArtistInfo(artistId) {
 }
 
 function getArtistImage(artist) {
-    const imageUrl = artist.images[1].url;
+    let imageUrl;
+
+    if( artist.images.length ) {
+        imageUrl = artist.images[1].url;
+    } else {
+        imageUrl = 'https://placehold.co/320x320';
+    }
     return `<img src="${imageUrl}" alt="${artist.name}">`;
 }
 
@@ -218,24 +210,88 @@ async function getTotalAlbums(artistId) {
 }
 
 function sortArtists(event) {
-    const order = event.target.value;
-    renderArtists(order);
+    const sortOrder = event.target.value;
+    sortAndRenderArtists(artistSource, sortOrder);
 }
 
-// async function searchArtists(event) {
-//     event.preventDefault();
-//     const searchTerm = event.target[0].value;
+function showLoadingIcon(isLoading) {
+    const icon = document.querySelector('.loading');
+    const grid = document.querySelector('.grid--artists');
 
-//     if( !accessToken ) {
-//         accessToken = await getAccessToken();
-//     }
-//     const response = await fetch(`https://api.spotify.com/v1/search?q=${searchTerm}&type=artist`, {
-//         headers: {
-//             'Authorization': `Bearer ${accessToken}`
-//         }
-//     });
+    if( isLoading ) {
+        // show icon
+        icon.classList.add('content-loading');
+        grid.classList.add('faded');
+    } else {
+        // hide icon
+        icon.classList.remove('content-loading');
+        grid.classList.remove('faded');
+    }
+}
 
-//     if( !searchData ) {
-//         searchData = await response.json();
-//     }
-// }
+async function sortAndRenderArtists(artistSource, sortOrder) {
+    // console.log(artistSource, sortOrder);
+
+    // show loading icon
+    showLoadingIcon(true);
+
+    // get current artists based on source
+
+    let artists = [...currentArtists];
+    let sortedArtists = artists;
+
+    // apply sort order
+    if( sortOrder === 'alphabetical_asc' ) {
+        sortedArtists.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+
+            if( nameA < nameB ) {
+                return -1;
+            } else if( nameA > nameB ) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    } else if( sortOrder === 'alphabetical_desc' ) {
+        sortedArtists.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+
+            if( nameA > nameB ) {
+                return -1;
+            } else if( nameA < nameB ) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    } else {
+        sortedArtists = artists;
+    }
+
+    // check for cached data
+    const isCached = sortedArtists.every(artist => localStorage.getItem(`artist_${artist.id}`));
+    const htmlArray = [];
+
+    // build html array
+    for( let i = 0; i < sortedArtists.length; i++ ) {
+        const html = await artistHtml(sortedArtists[i]);
+        htmlArray.push(html);
+        
+        // delay each request by 300ms to prevent exceeding rate limits (only if data is not cached)
+        if( !isCached ) {
+            await delay(200);
+        }
+    }
+
+    // output grid with artist info
+    document.querySelector('.grid--artists').innerHTML = htmlArray.join('');
+
+    // hide loading icon
+    showLoadingIcon(false);
+}
+
+// show popular artists on page load
+showPopularArtists();

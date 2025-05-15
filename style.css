@@ -163,8 +163,12 @@ nav .tagline p {
 **/
 .loading {
     display: none;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
     justify-content: center;
-    padding-top: 60px;
+    padding-top: 150px;
 }
 .loading.content-loading {
     display: flex;
@@ -187,6 +191,11 @@ nav .tagline p {
 .grid {
     display: flex;
     flex-wrap: wrap;
+}
+.grid.faded {
+    opacity: 0.2;
+    filter: grayscale(1);
+    pointer-events: none;
 }
 .grid__card {
     margin-top: 48px;

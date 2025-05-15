@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MusIQ | JS Final Project | FES</title>
     <link rel="stylesheet" href="./style.css">
-    <script src="./index.js"></script>
+    <script src="./index.js" defer></script>
 </head>
 <body>
     <header>
@@ -37,7 +37,7 @@
             <div class="container">
                 <div class="grid__heading">
                     <h2 class="grid__title">Top Artists</h2>
-                    <select onchange="sortArtists(event)">
+                    <select id="sort-artists" onchange="sortArtists(event)">
                         <option value="default" selected>Most Popular</option>
                         <option value="alphabetical_asc">Artist Name, A to Z</option>
                         <option value="alphabetical_desc">Artist Name, Z to A</option>
