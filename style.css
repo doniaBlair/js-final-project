@@ -66,6 +66,12 @@ select {
     font-size: 15px;
     cursor: pointer;
 }
+.color--purple {
+    color: #4f27e7;
+}
+.color--green {
+    color: #00f19b;
+}
 
 
 /**

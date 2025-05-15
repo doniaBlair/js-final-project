@@ -34,6 +34,7 @@
 // const clientSecret = '1eff2b0a945a4984ab69f5431e49ff35';
 const clientID = '5eea5bb6b03543a5aeffd28155206b0b';
 const clientSecret = 'd06fda22796249d7ad39e4f0944d32ac';
+const gridTitle = document.querySelector('#artists .grid__title');
 const orderSelect = document.querySelector('#sort-artists');
 let accessToken = '';
 let cached;
@@ -102,8 +103,15 @@ async function searchArtists(event) {
     // show default popular artists if no search term is entered
     if( !searchTerm ) {
         showPopularArtists();
+
+        // return grid title to default
+        gridTitle.innerHTML = 'Top Artists';
+
         return;
     }
+
+    // update grid title to show search term
+    gridTitle.innerHTML = `Search Results: <span class="color--purple">${searchTerm}</span>`;
 
     if( !accessToken ) {
         accessToken = await getAccessToken();
