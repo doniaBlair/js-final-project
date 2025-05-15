@@ -35,11 +35,6 @@ main {
 section {
     padding: 50px 0;
 }
-.section__heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 h1, h2, h3, h4, h5, h6 {
     line-height: 1.2;
 }
@@ -50,11 +45,6 @@ h1 {
 h2 {
     font-size: 28px;
     font-weight: 400;
-}
-h2.section__title {
-    font-family: 'Sofia Sans Semi Condensed', sans-serif;
-    font-weight: 700;
-    color: #120d23;
 }
 h3 {
     font-weight: 400;
@@ -70,10 +60,11 @@ a, button {
 }
 select {
     width: 100%;
-    max-width: 150px;
+    max-width: 220px;
     padding: 0 5px;
     height: 30px;
     font-size: 15px;
+    cursor: pointer;
 }
 
 
@@ -183,6 +174,16 @@ nav .tagline p {
     width: auto;
     animation: rotate 0.7s infinite linear;
 }
+.grid__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.grid__title {
+    font-family: 'Sofia Sans Semi Condensed', sans-serif;
+    font-weight: 700;
+    color: #120d23;
+}
 .grid {
     display: flex;
     flex-wrap: wrap;
@@ -268,7 +269,7 @@ footer .logo span {
     nav .tagline {
         display: none;
     }
-    .section__heading {
+    .grid__heading {
         flex-direction: column;
         gap: 12px 0;
         margin-bottom: 12px;

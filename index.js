@@ -22,19 +22,24 @@
 // website ui:
 // on page load, show a list of popular (or random) artists - 10 total in a grid
 // include a search input to search by artist name
-// include a filter to filter by genre
-// include a sort dropdown to sort alphabetical by artist name, number of albums/singles, ???
+// include a filter to filter by genre ???
+// include a sort dropdown to sort alphabetical by artist name, number of albums/singles
 // information for each artist will include: name, image, genres, number of albums, link to artist page
 // artist page will include name, image, genres, list of top tracks (name only), list of albums
 // information for each album will include: name, image, release date, number of tracks
 // search results will include artists only with same information as above
 
 
-const clientID = '5a6960985fbc4fd1b21b4a0c0be80839';
-const clientSecret = '1eff2b0a945a4984ab69f5431e49ff35';
+// const clientID = '5a6960985fbc4fd1b21b4a0c0be80839';
+// const clientSecret = '1eff2b0a945a4984ab69f5431e49ff35';
+const clientID = '5eea5bb6b03543a5aeffd28155206b0b';
+const clientSecret = 'd06fda22796249d7ad39e4f0944d32ac';
 let accessToken = '';
+let cached;
+let playlistData;
+let searchData;
 
-// 1. Get access token
+// get access token
 async function getAccessToken() {
     const response = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
@@ -50,8 +55,8 @@ async function getAccessToken() {
 }
 
 
-// 2. On page load, show the top ten artists from the public Billboard Hot 100 playlist: https://open.spotify.com/playlist/6UeSakyzhiEt4NB3UAd6NQ
-async function showTopArtists() {
+// on page load, show the top ten artists from the public Billboard Hot 100 playlist: https://open.spotify.com/playlist/6UeSakyzhiEt4NB3UAd6NQ
+async function renderArtists(order) {
     if( !accessToken ) {
         accessToken = await getAccessToken();
     }
@@ -61,7 +66,13 @@ async function showTopArtists() {
         }
     });
 
-    const playlistData = await response.json();
+    if( !playlistData ) {
+        playlistData = await response.json();
+    }
+
+    // add loading icon
+    document.querySelector('.loading').classList.add('content-loading');
+
     const tracks = playlistData.tracks.items;
 
     // get list of artists from tracks that are not explicit
@@ -74,16 +85,64 @@ async function showTopArtists() {
     
     // return first 10 artists
     const topTenArtists = uniqueArtists.slice(0, 10);
+    let sortedArtists = topTenArtists;
+
+    // apply sort order
+    if( order === 'alphabetical_asc' ) {
+        sortedArtists.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+
+            if( nameA < nameB ) {
+                return -1;
+            } else if( nameA > nameB ) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    } else if( order === 'alphabetical_desc' ) {
+        sortedArtists.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+
+            if( nameA > nameB ) {
+                return -1;
+            } else if( nameA < nameB ) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    } else {
+        sortedArtists = topTenArtists;
+    }
 
     // output grid with artist info
-    const artistsHtmlArray = await Promise.all(topTenArtists.map(artist => artistHtml(artist)));
+    // const artistsHtmlArray = await Promise.all(sortedArtists.map(artist => artistHtml(artist)));
+    const isCached = sortedArtists.every(artist => localStorage.getItem(`artist_${artist.id}`));
+    const artistsHtmlArray = [];
+    for( let i = 0; i < sortedArtists.length; i++ ) {
+        const artist = sortedArtists[i];
+        const html = await artistHtml(artist);
+        artistsHtmlArray.push(html);
+
+        // delay each request by 300ms to prevent exceeding rate limits (only if data is not cached)
+        if( !isCached ) {
+            await delay(500);
+        }
+    }
     const artistsHtml = artistsHtmlArray.join('');
     document.querySelector('.grid--artists').innerHTML = artistsHtml;
 
     // remove loading icon
     document.querySelector('.loading').classList.remove('content-loading');
 }
-showTopArtists();
+renderArtists();
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function artistHtml(artist) {
     const artistInfo = await getArtistInfo(artist.id);
@@ -102,6 +161,14 @@ async function artistHtml(artist) {
 }
 
 async function getArtistInfo(artistId) {
+    cached = localStorage.getItem(`artist_${artistId}`);
+    if( cached ) {
+        // console.log(`Fetched ${artistId} from cache`);
+        return JSON.parse(cached);
+    } else {
+        // console.log(`Fetched ${artistId} from API`);
+    }
+
     if( !accessToken ) {
         accessToken = await getAccessToken();
     }
@@ -110,7 +177,9 @@ async function getArtistInfo(artistId) {
             'Authorization': `Bearer ${accessToken}`
         }
     });
+
     const artistData = await response.json();
+    localStorage.setItem(`artist_${artistId}`, JSON.stringify(artistData));
     return artistData;
 }
 
@@ -127,14 +196,46 @@ function listGenres(genres) {
 }
 
 async function getTotalAlbums(artistId) {
+    const cached = localStorage.getItem(`artist_${artistId}_albums`);
+    if( cached ) {
+        // console.log(`Fetched albums for ${artistId} from cache`);
+        return parseInt(cached, 10);
+    }
+    // console.log(`Fetched albums for ${artistId} from API`);
+
     if( !accessToken ) {
         accessToken = await getAccessToken();
     }
+
     const response = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`
         }
     });
     const artistAlbums = await response.json();
+    localStorage.setItem(`artist_${artistId}_albums`, artistAlbums.total);
     return artistAlbums.total;
 }
+
+function sortArtists(event) {
+    const order = event.target.value;
+    renderArtists(order);
+}
+
+// async function searchArtists(event) {
+//     event.preventDefault();
+//     const searchTerm = event.target[0].value;
+
+//     if( !accessToken ) {
+//         accessToken = await getAccessToken();
+//     }
+//     const response = await fetch(`https://api.spotify.com/v1/search?q=${searchTerm}&type=artist`, {
+//         headers: {
+//             'Authorization': `Bearer ${accessToken}`
+//         }
+//     });
+
+//     if( !searchData ) {
+//         searchData = await response.json();
+//     }
+// }
